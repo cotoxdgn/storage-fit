@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>収納ぴったり検索</title>
+<meta name="theme-color" content="#1E2126">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="収納ぴったり">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root{--bg:#F5F4F0;--card:#FFFFFF;--ink:#1E2126;--sub:#5A5F66;--line:#C9CBCE;--accent:#1F5E7A;--box:#CFE0E8;--fig:#EEF3F5}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;-webkit-text-size-adjust:100%}
+.mono{font-family:ui-monospace,"SF Mono",Consolas,"Menlo",monospace}
+button,input{font:inherit;color:inherit}
+.app{max-width:1200px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 24px);display:grid;gap:20px}
+@media(min-width:820px){.app{grid-template-columns:360px minmax(0,1fr);align-items:start}.search{position:sticky;top:16px}#back{display:none!important}}
+header p{margin:0;font-size:12px;color:var(--sub);letter-spacing:.08em}
+header h1{margin:2px 0 0;font-size:22px}
+.panel{background:var(--card);border-radius:14px;padding:16px;display:grid;gap:12px}
+h2{margin:0;font-size:14px}
+.dims{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+label.f{display:grid;gap:4px;font-size:12px;color:var(--sub)}
+input[type=number],input[type=text]{height:48px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:#fff;width:100%;font-size:16px}
+.dims input{font-size:18px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px}
+.row input{width:76px;text-align:right}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.toggle{background:var(--card);border-radius:12px;padding:0 14px;min-height:52px}
+.toggle input{width:22px;height:22px;accent-color:var(--accent)}
+.go{height:56px;border:0;border-radius:14px;background:var(--ink);color:#fff;font-size:16px;font-weight:700;cursor:pointer;width:100%}
+.err{color:#A3341A;font-size:13px;margin:0}
+.summary{background:var(--ink);color:#fff;border-radius:14px;padding:14px 16px;display:grid;gap:8px}
+.summary .memo{margin:0;font-size:15px;font-weight:700}
+.summary .kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;font-size:12px;color:#D5D7DA}
+.summary .kv b{color:#fff;font-weight:500}
+.hint{margin:6px 0 0;font-size:11px;color:var(--sub)}
+.reshead{display:flex;align-items:center;gap:8px}
+.reshead h2{font-size:18px}
+#back{width:44px;height:44px;border-radius:22px;border:0;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.list{display:grid;gap:14px;margin-top:12px}
+@media(min-width:1100px){.list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{background:var(--card);border-radius:14px;padding:16px;display:grid;gap:12px;align-content:start}
+.ctop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.ctop .meta{margin:0;font-size:12px;color:var(--sub)}
+.ctop h3{margin:2px 0;font-size:16px;line-height:1.4}
+.fill{text-align:right;flex-shrink:0}
+.fill p{margin:0;font-size:11px;color:var(--sub)}
+.fill .v{font-size:26px;color:var(--accent);margin:0}
+figure{margin:0;display:grid;gap:4px;align-content:end}
+.figs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end}
+figcaption{font-size:11px;color:var(--sub)}
+.fig{position:relative;border:2px solid var(--ink);background:var(--fig);width:100%}
+.fig i{position:absolute;border:1px solid var(--accent);background:var(--box)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:12px}
+.stats div{background:var(--bg);border-radius:10px;padding:8px 10px}
+.stats p{margin:0;color:var(--sub)}
+.stats .v{margin:2px 0 0;color:var(--ink);font-size:15px}
+.link{display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border-radius:10px;border:1px solid var(--line);font-size:13px;color:var(--accent);text-decoration:none}
+.empty{background:var(--card);border-radius:14px;padding:20px;font-size:14px;color:var(--sub)}
+footer{font-size:11px;color:var(--sub);grid-column:1/-1}
+.hide{display:none!important}
+@media(max-width:819px){body.show-res .search{display:none}body:not(.show-res) .results{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="search" aria-label="検索条件">
+    <header><p>STORAGE FIT</p><h1>収納ぴったり検索</h1></header>
+    <form id="form" novalidate style="display:grid;gap:16px;margin-top:12px">
+      <div class="panel">
+        <h2>収納スペースの内寸（mm）</h2>
+        <div class="dims">
+          <label class="f">幅 W<input id="W" type="number" inputmode="numeric" min="1" class="mono" placeholder="900"></label>
+          <label class="f">奥行 D<input id="D" type="number" inputmode="numeric" min="1" class="mono" placeholder="400"></label>
+          <label class="f">高さ H<input id="H" type="number" inputmode="numeric" min="1" class="mono" placeholder="360"></label>
+        </div>
+        <label class="row">余裕寸法（各方向）<span style="display:flex;align-items:center;gap:6px"><input id="M" type="number" inputmode="numeric" min="0" value="10" class="mono"><span style="color:var(--sub)">mm</span></span></label>
+        <label class="f" style="font-size:13px;color:var(--ink)">物件メモ（任意・保存されません）<input id="memo" type="text" placeholder="例：〇〇邸／洗面下"></label>
+      </div>
+      <div style="display:grid;gap:10px">
+        <h2>メーカー</h2>
+        <div class="chips" id="brands"></div>
+        <h2 style="margin-top:6px">カテゴリ</h2>
+        <div class="chips" id="cats"></div>
+        <label class="row toggle" style="margin-top:6px">箱の向きを90°回転しても探す<input id="rot" type="checkbox" checked></label>
+      </div>
+      <p class="err hide" id="err"></p>
+      <button class="go" type="submit">ぴったりを探す</button>
+    </form>
+  </section>
+
+  <section class="results" aria-live="polite">
+    <div class="reshead">
+      <button id="back" type="button" aria-label="検索に戻る"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2 id="count">検索結果</h2>
+    </div>
+    <div id="sum"></div>
+    <div class="list" id="list"><div class="empty">内寸を入れて「ぴったりを探す」を押すと、ここに結果が出ます。</div></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+<script src="products.js"></script>
+<script>
+(function(){
+var P = window.PRODUCTS || [];
+var BRANDS = ['無印良品','IKEA'];
+var CATS = [['all','すべて'],['case','引出・ケース'],['file','ファイルボックス'],['soft','ソフトボックス'],['basket','バスケット'],['box','ボックス']];
+var st = { brands: BRANDS.slice(), cat: 'all' };
+var $ = function(id){ return document.getElementById(id); };
+var esc = function(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+var fmt = function(n){ return (Math.round(n*10)/10).toString(); };
+var yen = function(n){ return n == null ? '—' : '¥' + n.toLocaleString('ja-JP'); };
+
+function chips(){
+  $('brands').innerHTML = BRANDS.map(function(b){ return '<button type="button" class="chip" data-b="'+esc(b)+'" aria-pressed="'+(st.brands.indexOf(b)>=0)+'">'+esc(b)+'</button>'; }).join('');
+  $('cats').innerHTML = CATS.map(function(c){ return '<button type="button" class="chip" data-c="'+c[0]+'" aria-pressed="'+(st.cat===c[0])+'">'+c[1]+'</button>'; }).join('');
+}
+$('brands').addEventListener('click', function(e){
+  var b = e.target.closest('[data-b]'); if(!b) return;
+  var v = b.getAttribute('data-b'), i = st.brands.indexOf(v);
+  if(i>=0){ if(st.brands.length>1) st.brands.splice(i,1); } else st.brands.push(v);
+  chips();
+});
+$('cats').addEventListener('click', function(e){
+  var c = e.target.closest('[data-c]'); if(!c) return;
+  st.cat = c.getAttribute('data-c'); chips();
+});
+
+// 1商品の並びを計算（奥行方向は常に1列）
+function fit(p, EW, ED, EH, w, d){
+  if(d > ED || w > EW || p.h > EH) return null;
+  var cols = Math.floor(EW / w);
+  var rows = p.stackable ? Math.floor(EH / p.h) : 1;
+  var n = cols * rows;
+  var fill = n * w * d * p.h / (EW * ED * EH);
+  return { cols: cols, rows: rows, n: n, fill: fill, w: w, d: d, gw: EW - cols*w, gd: ED - d, gh: EH - rows*p.h, rotated: false };
+}
+function search(c){
+  var EW = c.W - c.M, ED = c.D - c.M, EH = c.H - c.M, out = [];
+  if(EW<=0||ED<=0||EH<=0) return { W:c.W, D:c.D, H:c.H, EW:EW, ED:ED, EH:EH, items:[] };
+  P.forEach(function(p){
+    if(c.brands.indexOf(p.brand) < 0) return;
+    if(c.cat !== 'all' && p.category !== c.cat) return;
+    var a = fit(p, EW, ED, EH, p.w, p.d), b = null;
+    if(c.rot && p.w !== p.d){ b = fit(p, EW, ED, EH, p.d, p.w); if(b) b.rotated = true; }
+    var best = a && b ? (b.fill > a.fill ? b : a) : (a || b);
+    if(best){ best.p = p; var pk = p.pack || 1; best.packs = Math.ceil(best.n / pk); best.total = p.price == null ? null : p.price * best.packs; out.push(best); }
+  });
+  out.sort(function(x,y){ return (y.fill - x.fill) || ((x.total==null?1e12:x.total) - (y.total==null?1e12:y.total)); });
+  // 充填率が最上位から10ポイント以内のものの中では、個数の少ないものを先に出す
+  var ranked = [];
+  while(out.length){
+    var top = out[0].fill, k = 0;
+    for(var i=1;i<out.length && out[i].fill >= top - 0.10;i++){ if(out[i].n < out[k].n) k = i; }
+    ranked.push(out.splice(k,1)[0]);
+  }
+  out = ranked;
+  return { W:c.W, D:c.D, H:c.H, EW:EW, ED:ED, EH:EH, items: out };
+}
+
+function boxes(list){ return list.map(function(r){ return '<i style="left:'+r[0]+'%;bottom:'+r[1]+'%;width:'+r[2]+'%;height:'+r[3]+'%"></i>'; }).join(''); }
+// 図は内寸基準。左右のクリアランスが同じになるよう中央に配置
+function side(r, W){ return (W - r.cols*r.w) / 2; }
+function front(r, W, H){
+  var a = [], i, j, s = side(r, W);
+  for(j=0;j<r.rows;j++) for(i=0;i<r.cols;i++) a.push([(s+i*r.w)/W*100, j*r.p.h/H*100, r.w/W*100, r.p.h/H*100]);
+  return '<div class="fig" role="img" aria-label="正面図：横'+r.cols+'個・'+r.rows+'段、左右中央" style="aspect-ratio:'+W+'/'+H+'">'+boxes(a)+'</div>';
+}
+function plan(r, W, D){
+  var a = [], i, s = side(r, W);
+  for(i=0;i<r.cols;i++) a.push([(s+i*r.w)/W*100, 0, r.w/W*100, r.d/D*100]);
+  return '<div class="fig" role="img" aria-label="平面図：横'+r.cols+'個が手前に並ぶ、左右中央" style="aspect-ratio:'+W+'/'+D+'">'+boxes(a)+'</div>';
+}
+function card(r, k, R){
+  var p = r.p;
+  return '<article class="card">'+
+    '<div class="ctop"><div style="min-width:0"><p class="meta">'+(k+1)+'位　'+esc(p.brand)+'</p><h3>'+esc(p.name)+'</h3>'+
+    '<p class="meta">品番 <span class="mono">'+esc(p.code||'—')+'</span>　外寸 <span class="mono">'+p.w+'×'+p.d+'×'+p.h+'</span>'+(r.rotated?'　<b style="color:var(--accent)">90°回転</b>':'')+'</p></div>'+
+    '<div class="fill"><p>充填率</p><p class="v mono">'+Math.round(r.fill*100)+'%</p></div></div>'+
+    '<div class="figs"><figure>'+front(r,R.W,R.H)+'<figcaption>正面図</figcaption></figure>'+
+    '<figure>'+plan(r,R.W,R.D)+'<figcaption>平面図（下が手前）</figcaption></figure></div>'+
+    '<div class="stats">'+
+      '<div><p>並び数（横×段）</p><p class="v mono">'+r.cols+'×'+r.rows+'段＝'+r.n+'個</p></div>'+
+      '<div><p>クリアランス</p><p class="v mono" style="font-size:13px">左右 各'+fmt(side(r,R.W))+'<br>奥 '+(R.D-r.d)+'　上 '+(R.H-r.rows*r.p.h)+'</p></div>'+
+      '<div><p>参考価格</p><p class="v">'+yen(p.price)+((p.pack||1)>1?'<span style="font-size:11px;color:var(--sub)">／'+p.pack+'個入り</span>':'')+'</p></div>'+
+      '<div><p>合計'+((p.pack||1)>1?'（'+r.packs+'パック）':'')+'</p><p class="v">'+yen(r.total)+'</p></div>'+
+    '</div>'+
+    '<a class="link" href="'+esc(p.url)+'" target="_blank" rel="noopener">商品ページを開く <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>'+
+  '</article>';
+}
+
+function read(){
+  return { W:+$('W').value, D:+$('D').value, H:+$('H').value, M:$('M').value===''?0:+$('M').value, memo:$('memo').value.trim(), rot:$('rot').checked, brands:st.brands.slice(), cat:st.cat };
+}
+function run(c, push){
+  var bad = !(c.W>0 && c.D>0 && c.H>0) || !(c.M>=0);
+  $('err').classList.toggle('hide', !bad);
+  if(bad){ $('err').textContent = '幅・奥行・高さを1以上の数字で入れてください。'; return; }
+  var R = search(c);
+  $('count').textContent = '検索結果 ' + R.items.length + '件';
+  $('sum').innerHTML = '<div class="summary" style="margin-top:8px">'+(c.memo?'<p class="memo">'+esc(c.memo)+'</p>':'')+
+    '<div class="kv"><span>内寸 <b class="mono">'+c.W+'×'+c.D+'×'+c.H+'</b></span><span>余裕寸法 <b class="mono">'+c.M+'mm</b></span>'+
+    '<span>有効寸法 <b class="mono">'+R.EW+'×'+R.ED+'×'+R.EH+'</b></span><span>'+esc(c.brands.join('・'))+'／'+(c.rot?'回転あり':'回転なし')+'</span></div></div>'+
+    '<p class="hint">この画面をスクショすると、条件と結果を1枚で残せます。URLをブックマークすれば同じ検索を再表示できます。</p>';
+  $('list').innerHTML = R.items.length ? R.items.slice(0,60).map(function(r,k){ return card(r,k,R); }).join('')
+    : '<div class="empty">この寸法に収まる商品は見つかりませんでした。余裕寸法やカテゴリを見直してください。</div>';
+  document.body.classList.add('show-res');
+  var q = new URLSearchParams({ w:c.W, d:c.D, h:c.H, m:c.M, r:c.rot?1:0, b:c.brands.join(','), c:c.cat });
+  if(c.memo) q.set('memo', c.memo);
+  history[push?'pushState':'replaceState']({res:1}, '', '?' + q.toString());
+  window.scrollTo(0,0);
+}
+function fromUrl(){
+  var q = new URLSearchParams(location.search);
+  if(!q.has('w')) return false;
+  $('W').value = q.get('w'); $('D').value = q.get('d'); $('H').value = q.get('h');
+  $('M').value = q.has('m') ? q.get('m') : 10; $('memo').value = q.get('memo') || '';
+  $('rot').checked = q.get('r') !== '0';
+  var b = (q.get('b')||'').split(',').filter(function(x){ return BRANDS.indexOf(x)>=0; });
+  st.brands = b.length ? b : BRANDS.slice();
+  st.cat = CATS.some(function(c){ return c[0]===q.get('c'); }) ? q.get('c') : 'all';
+  chips(); run(read(), false); return true;
+}
+$('form').addEventListener('submit', function(e){ e.preventDefault(); run(read(), true); });
+$('back').addEventListener('click', function(){ document.body.classList.remove('show-res'); window.scrollTo(0,0); });
+window.addEventListener('popstate', function(){ if(!fromUrl()) document.body.classList.remove('show-res'); });
+
+chips();
+$('foot').textContent = '商品データ：無印良品・IKEA公式サイト掲載の外寸（' + (window.PRODUCTS_CHECKED||'') + '確認、' + P.length + '件）。廃番・仕様変更・価格改定の可能性があるため、発注前に商品ページで確認してください。';
+fromUrl();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+window.__search = search;
+})();
+</script>
+</body>
+</html>
