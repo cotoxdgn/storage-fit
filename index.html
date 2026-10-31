@@ -191,8 +191,8 @@ function card(r, k, R){
     '<div class="stats">'+
       '<div><p>並び数（横×段）</p><p class="v mono">'+r.cols+'×'+r.rows+'段＝'+r.n+'個</p></div>'+
       '<div><p>クリアランス</p><p class="v mono" style="font-size:13px">左右 各'+fmt(side(r,R.W))+'<br>奥 '+(R.D-r.d)+'　上 '+(R.H-r.rows*r.p.h)+'</p></div>'+
-      '<div><p>参考価格</p><p class="v">'+yen(p.price)+((p.pack||1)>1?'<span style="font-size:11px;color:var(--sub)">／'+p.pack+'個入り</span>':'')+'</p></div>'+
-      '<div><p>合計'+((p.pack||1)>1?'（'+r.packs+'パック）':'')+'</p><p class="v">'+yen(r.total)+'</p></div>'+
+      '<div style="grid-column:1/-1;background:var(--ink);color:#fff"><p style="color:#D5D7DA">合計金額（参考・税込）</p><p class="v" style="color:#fff;font-size:20px;font-weight:700">'+yen(r.total)+'</p>'+
+      '<p style="color:#D5D7DA;margin-top:2px">'+((p.pack||1)>1 ? yen(p.price)+'／'+p.pack+'個入り × '+r.packs+'パック（'+r.n+'個使用）' : yen(p.price)+' × '+r.n+'個')+'</p></div>'+
     '</div>'+
     '<a class="link" href="'+esc(p.url)+'" target="_blank" rel="noopener">商品ページを開く <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>'+
   '</article>';
